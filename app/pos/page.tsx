@@ -224,57 +224,51 @@ export default function POSPage() {
 
   return (
     <PageLayout title="Point of Sale">
-      <div className="h-full flex flex-col lg:flex-row gap-4">
-        {/* Left side - Products */}
-        <div className="lg:w-2/3 flex flex-col">
-          {/* Search bar */}
+      <div className="h-full flex">
+        {/* Main content area - Products */}
+        <div className="flex-1 flex flex-col overflow-hidden pr-4">
+          {/* Search and filters */}
           <div className="mb-4">
-            <div className="relative mb-4">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 border rounded-lg text-gray-900 placeholder-gray-500"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          {/* Category filter buttons */}
-          <div className="bg-white p-4 rounded-lg shadow mb-4 overflow-x-auto">
-            <div className="flex space-x-2">
+            <div className="flex items-center space-x-4 overflow-x-auto pb-2">
               <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-4 py-2 rounded-md text-sm font-medium ${
+                className={`px-4 py-2 rounded-lg flex-shrink-0 ${
                   selectedCategory === null
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
+                onClick={() => setSelectedCategory(null)}
               >
                 All
               </button>
-              {categories && categories.map((category) => (
+              {categories.map(category => (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium ${
+                  className={`px-4 py-2 rounded-lg flex-shrink-0 ${
                     selectedCategory === category.id
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
+                  onClick={() => setSelectedCategory(category.id)}
                 >
                   {category.name}
                 </button>
               ))}
             </div>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="w-full px-4 py-2 border rounded-lg"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
-          
+
           {/* Products grid */}
-          <div className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto pb-4">
-            {/* Filter products by the selected category */}
-            {products
-              .filter(product => selectedCategory === null || product.categoryId === selectedCategory)
-              .map((product) => (
+          <div className="flex-1 overflow-y-auto bg-white rounded-lg shadow-sm p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredProducts.map((product) => (
                 <div
                   key={product.id}
                   className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow"
@@ -314,120 +308,88 @@ export default function POSPage() {
                   </div>
                 </div>
               ))}
+            </div>
           </div>
         </div>
-        
-        {/* Right side - Cart */}
-        <div className="lg:w-1/3 bg-white rounded-lg shadow p-4 flex flex-col h-full">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Current Order</h2>
-          
-          {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto mb-4">
-            {cart.map((item) => (
-              <div key={item.id} className="flex items-start mb-4">
-                <div className="h-12 w-12 flex-shrink-0">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-12 w-12 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                      <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <div className="ml-4 flex-1">
-                  <div className="flex justify-between">
-                    <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="text-sm text-gray-500">₱{item.price.toFixed(2)}</div>
-                  <div className="flex items-center mt-1">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 0)}
-                      className="w-16 text-center mx-2 border rounded"
-                    />
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+
+        {/* Checkout panel - Fixed width */}
+        <div className="w-[400px] flex-shrink-0 flex flex-col bg-white rounded-lg shadow-sm">
+          {/* Cart items */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <h2 className="text-lg font-semibold mb-4">Cart</h2>
+            {cart.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                Cart is empty
               </div>
-            ))}
+            ) : (
+              <div className="space-y-4">
+                {cart.map((item) => (
+                  <div key={item.id} className="flex items-center space-x-4">
+                    <div className="flex-1">
+                      <div className="font-medium">{item.name}</div>
+                      <div className="text-sm text-gray-500">
+                        ₱{item.price.toFixed(2)} × {item.quantity}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">₱{(item.price * item.quantity).toFixed(2)}</div>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="p-1 rounded-md hover:bg-gray-100"
+                        >
+                          -
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="p-1 rounded-md hover:bg-gray-100"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Order Summary */}
-          <div className="border-t pt-4">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="text-gray-900">₱{subtotal.toFixed(2)}</span>
+          {/* Checkout summary */}
+          <div className="border-t p-4 space-y-4">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal</span>
+              <span>₱{subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Tax (12%)</span>
-              <span className="text-gray-900">₱{tax.toFixed(2)}</span>
+            <div className="flex justify-between text-sm">
+              <span>Tax (12%)</span>
+              <span>₱{tax.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between mb-4">
-              <span className="font-medium text-gray-900">Total</span>
-              <span className="font-medium text-gray-900">₱{total.toFixed(2)}</span>
+            <div className="flex justify-between font-semibold">
+              <span>Total</span>
+              <span>₱{total.toFixed(2)}</span>
             </div>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cash</label>
+            <div className="pt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cash
+              </label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
+                className="w-full px-3 py-2 border rounded-md"
                 value={cash}
                 onChange={(e) => setCash(parseFloat(e.target.value) || 0)}
-                onFocus={(e) => {
-                  if (cash === 0) {
-                    e.target.value = '';
-                  }
-                }}
-                onBlur={(e) => {
-                  if (e.target.value === '') {
-                    setCash(0);
-                  }
-                }}
-                className="w-full px-3 py-2 border rounded-lg text-gray-900"
-                placeholder="Enter cash amount"
               />
             </div>
-            
-            {cash >= total && (
-              <div className="flex justify-between mb-4 text-green-600 font-medium">
-                <span>Change</span>
-                <span>₱{change.toFixed(2)}</span>
-              </div>
-            )}
-
+            <div className="flex justify-between text-lg font-semibold">
+              <span>Change</span>
+              <span>₱{(cash - total).toFixed(2)}</span>
+            </div>
             <button
               onClick={handleCompleteSale}
               disabled={cart.length === 0 || cash < total}
-              className={`w-full py-2 px-4 rounded-lg ${
-                cart.length === 0 || cash < total
-                  ? 'bg-gray-300 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
+              className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               Complete Sale
             </button>

@@ -44,8 +44,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log(`PUT /api/products/${params.id} called`);
-    
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const description = formData.get('description') as string || '';
@@ -53,16 +51,11 @@ export async function PUT(
     const stock = parseInt(formData.get('stock') as string);
     const categoryId = formData.get('categoryId') as string;
     const image = formData.get('image') as File | null;
-    const currentImage = formData.get('currentImage') as string || null;
 
-    console.log("Parsed data:", { name, description, price, stock, categoryId, hasImage: !!image, hasCurrentImage: !!currentImage });
-
-    let imageUrl = currentImage;
+    let imageUrl = null;
 
     if (image) {
       try {
-        console.log("Uploading new image...");
-        
         // Convert file to base64
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
@@ -88,13 +81,11 @@ export async function PUT(
         
         imageUrl = uploadResult.secure_url;
       } catch (uploadError) {
-        console.error("Error during image upload:", uploadError);
+        console.error("Upload error:", uploadError);
         throw new Error(`Image upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
       }
     }
 
-    console.log("Updating product with image URL:", imageUrl);
-    
     // Update product
     const product = await prisma.product.update({
       where: {
@@ -106,14 +97,13 @@ export async function PUT(
         price,
         stock,
         categoryId,
-        image: imageUrl,
+        ...(imageUrl && { image: imageUrl }),
       },
       include: {
         category: true,
       },
     });
 
-    console.log("Product updated:", product);
     return NextResponse.json(product);
   } catch (error) {
     console.error("Error updating product:", error);

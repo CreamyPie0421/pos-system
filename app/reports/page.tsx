@@ -7,7 +7,8 @@ import {
   CalendarIcon, 
   ArrowTrendingUpIcon,
   CurrencyDollarIcon,
-  ShoppingCartIcon
+  ShoppingCartIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import {
   LineChart,
@@ -29,6 +30,7 @@ interface TopProduct {
   name: string;
   quantity: number;
   total: number;
+  image: string | null;
 }
 
 export default function ReportsPage() {
@@ -213,7 +215,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Top Products Table */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Top Products</h3>
           </div>
@@ -235,8 +237,25 @@ export default function ReportsPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {topProducts.map((product, index) => (
                   <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {product.name}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-12 w-12 flex-shrink-0">
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="h-12 w-12 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {product.quantity}

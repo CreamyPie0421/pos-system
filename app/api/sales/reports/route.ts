@@ -106,7 +106,7 @@ function processSalesData(sales: any[], timeRange: string) {
 }
 
 async function getTopProducts(sales: any[]) {
-  const productSales: { [key: string]: { name: string; quantity: number; total: number } } = {};
+  const productSales: { [key: string]: { name: string; quantity: number; total: number; image: string | null } } = {};
 
   sales.forEach(sale => {
     sale.items.forEach((item: any) => {
@@ -116,6 +116,7 @@ async function getTopProducts(sales: any[]) {
           name: item.product.name,
           quantity: 0,
           total: 0,
+          image: item.product.image
         };
       }
 

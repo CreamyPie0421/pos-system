@@ -1,13 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url);
-    const timeRange = url.searchParams.get('timeRange') || 'daily';
+    const timeRange = request.nextUrl.searchParams.get('timeRange') || 'daily';
 
     // Get date range based on timeRange
     const startDate = new Date();

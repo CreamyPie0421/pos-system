@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // GET /api/sales
 export async function GET() {
@@ -20,7 +21,17 @@ export async function GET() {
         createdAt: 'desc'
       }
     });
-    return NextResponse.json(sales);
+
+    // Transform the data to include productName
+    const transformedSales = sales.map(sale => ({
+      ...sale,
+      items: sale.items.map(item => ({
+        ...item,
+        productName: item.product.name
+      }))
+    }));
+
+    return NextResponse.json(transformedSales);
   } catch (error) {
     return NextResponse.json({ error: 'Error fetching sales' }, { status: 500 });
   }

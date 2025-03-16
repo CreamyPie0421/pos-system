@@ -60,9 +60,17 @@ model Customer {
 
 model Sale {
   id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id])
   customer   Customer?  @relation(fields: [customerId], references: [id])
   customerId String?
-  saleItems  SaleItem[]
+  subtotal   Float
+  tax        Float
+  total      Float
+  cashGiven  Float
+  change     Float
+  status     String     @default("COMPLETED")
+  items      SaleItem[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }

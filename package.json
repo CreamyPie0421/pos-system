@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node --no-warnings prisma generate && node --no-warnings next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },

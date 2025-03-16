@@ -2,17 +2,35 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dyudq9geu',
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+export const dynamic = 'force-dynamic';
+
+// Move cloudinary config to a separate function
+function initCloudinary() {
+  try {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dyudq9geu',
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+  } catch (error) {
+    console.error('Cloudinary config error:', error);
+  }
+}
 
 export async function POST(request: Request) {
   try {
-    console.log("POST /api/products-base64 called");
+    initCloudinary(); // Initialize cloudinary before using it
     
+    console.log("POST /api/products-base64 called");
     const data = await request.json();
+    
+    // Log environment variables (without secrets)
+    console.log("Cloudinary config:", {
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      hasApiKey: !!process.env.CLOUDINARY_API_KEY,
+      hasApiSecret: !!process.env.CLOUDINARY_API_SECRET
+    });
+
     const { name, description, price, stock, categoryId, imageBase64 } = data;
     
     console.log("Received data:", { name, description, price, stock, categoryId, hasImage: !!imageBase64 });

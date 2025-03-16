@@ -93,8 +93,7 @@ export default function InventoryPage() {
     
     try {
       setIsSubmitting(true);
-      
-      let imageUrl = null;
+      setError(null); // Clear previous errors
       
       if (formData.image) {
         try {
@@ -102,18 +101,18 @@ export default function InventoryPage() {
           const reader = new FileReader();
           const base64Promise = new Promise<string>((resolve, reject) => {
             reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
+            reader.onerror = (error) => reject(error);
           });
           reader.readAsDataURL(formData.image);
           
           const base64Data = await base64Promise;
           
-          // Send base64 data to server
+          console.log("Sending product data with image");
           const productData = {
             name: formData.name,
             description: formData.description || '',
-            price: formData.price,
-            stock: formData.stock,
+            price: Number(formData.price),
+            stock: Number(formData.stock),
             categoryId: formData.categoryId,
             imageBase64: base64Data
           };
@@ -131,7 +130,6 @@ export default function InventoryPage() {
             throw new Error(errorData.error || 'Failed to add product');
           }
           
-          // Success handling
           const newProduct = await response.json();
           setProducts([...products, newProduct]);
           setIsAddModalOpen(false);
@@ -141,12 +139,12 @@ export default function InventoryPage() {
           throw error;
         }
       } else {
-        // No image, just create product
+        console.log("Sending product data without image");
         const productData = {
           name: formData.name,
           description: formData.description || '',
-          price: formData.price,
-          stock: formData.stock,
+          price: Number(formData.price),
+          stock: Number(formData.stock),
           categoryId: formData.categoryId
         };
         
@@ -163,7 +161,6 @@ export default function InventoryPage() {
           throw new Error(errorData.error || 'Failed to add product');
         }
         
-        // Success handling
         const newProduct = await response.json();
         setProducts([...products, newProduct]);
         setIsAddModalOpen(false);

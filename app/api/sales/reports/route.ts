@@ -2,21 +2,37 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
-    // Get today's date range
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const url = new URL(request.url);
+    const timeRange = url.searchParams.get('timeRange') || 'daily';
 
-    // Get sales for today
+    // Get date range based on timeRange
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+
+    let endDate = new Date();
+    switch (timeRange) {
+      case 'weekly':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case 'monthly':
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case 'yearly':
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default: // daily
+        endDate.setDate(endDate.getDate() + 1);
+    }
+
     const sales = await prisma.sale.findMany({
       where: {
         createdAt: {
-          gte: today,
-          lt: tomorrow
+          gte: startDate,
+          lt: endDate
         }
       },
       include: {
@@ -28,7 +44,14 @@ export async function GET(request: Request) {
       }
     });
 
-    return NextResponse.json(sales);
+    // Process data based on timeRange
+    const salesData = processSalesData(sales, timeRange);
+    const topProducts = await getTopProducts(sales);
+
+    return NextResponse.json({
+      salesData,
+      topProducts
+    });
   } catch (error) {
     console.error('Error fetching sales reports:', error);
     return NextResponse.json(

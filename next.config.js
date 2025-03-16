@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    DATABASE_URL: process.env.DATABASE_URL,
+    DATABASE_URL: process.env.POSTGRES_PRISMA_URL,
   },
 };
 

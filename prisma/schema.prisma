@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("POSTGRES_PRISMA_URL")
 }
 
 model User {
@@ -56,43 +56,25 @@ model Customer {
   name      String
   email     String?  @unique
   phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  sales     Sale[]
 }
 
 model Sale {
-  id         String     @id @default(uuid())
-  customerId String?
+  id         String     @id @default(cuid())
   customer   Customer?  @relation(fields: [customerId], references: [id])
-  userId     String
-  user       User       @relation(fields: [userId], references: [id])
-  items      SaleItem[]
-  subtotal   Float
-  tax        Float
-  total      Float
-  cashGiven  Float?
-  change     Float?
-  status     SaleStatus @default(COMPLETED)
+  customerId String?
+  saleItems  SaleItem[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
 
 model SaleItem {
-  id        String   @id @default(uuid())
-  saleId    String
-  sale      Sale     @relation(fields: [saleId], references: [id])
-  productId String
+  id        String   @id @default(cuid())
   product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  sale      Sale     @relation(fields: [saleId], references: [id])
+  saleId    String
   quantity  Int
-  price     Float
-  subtotal  Float
+  price    Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-enum SaleStatus {
-  PENDING
-  COMPLETED
-  CANCELLED
 }

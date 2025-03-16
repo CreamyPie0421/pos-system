@@ -28,7 +28,7 @@ interface CartItem extends Product {
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +67,7 @@ export default function POSPage() {
   }, []);
 
   const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.category.name === selectedCategory;
+    const matchesCategory = selectedCategory === null || product.category.name === selectedCategory;
     const searchLower = searchQuery.toLowerCase();
     const productName = product.name.toLowerCase();
     
@@ -224,11 +224,11 @@ export default function POSPage() {
 
   return (
     <PageLayout title="Point of Sale">
-      <div className="h-full flex">
-        {/* Products Section */}
-        <div className="flex-1 flex flex-col mr-4">
-          {/* Search and Categories */}
-          <div className="mb-6">
+      <div className="h-full flex flex-col lg:flex-row gap-4">
+        {/* Left side - Products */}
+        <div className="lg:w-2/3 flex flex-col">
+          {/* Search bar */}
+          <div className="mb-4">
             <div className="relative mb-4">
               <input
                 type="text"
@@ -237,46 +237,48 @@ export default function POSPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              
             </div>
-            <div className="flex space-x-2 overflow-x-auto pb-2">
+          </div>
+          
+          {/* Category filter buttons */}
+          <div className="bg-white p-4 rounded-lg shadow mb-4 overflow-x-auto">
+            <div className="flex space-x-2">
               <button
-                className={`px-4 py-2 rounded-lg whitespace-nowrap ${
-                  selectedCategory === 'all'
+                onClick={() => setSelectedCategory(null)}
+                className={`px-4 py-2 rounded-md text-sm font-medium ${
+                  selectedCategory === null
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
-                onClick={() => setSelectedCategory('all')}
               >
                 All
               </button>
-              {categories.map(category => (
+              {categories && categories.map((category) => (
                 <button
                   key={category.id}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap ${
-                    selectedCategory === category.name
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium ${
+                    selectedCategory === category.id
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
-                  onClick={() => setSelectedCategory(category.name)}
                 >
                   {category.name}
                 </button>
               ))}
             </div>
           </div>
-
-          {/* Products Grid */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
-              {filteredProducts.map((product) => (
-                <button
+          
+          {/* Products grid */}
+          <div className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto pb-4">
+            {/* Filter products by the selected category */}
+            {products
+              .filter(product => selectedCategory === null || product.categoryId === selectedCategory)
+              .map((product) => (
+                <div
                   key={product.id}
+                  className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow"
                   onClick={() => addToCart(product)}
-                  className={`flex flex-col bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 w-full ${
-                    product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  disabled={product.stock <= 0}
                 >
                   <div className="h-32 w-full bg-gray-100 rounded-lg overflow-hidden">
                     {product.image ? (
@@ -310,14 +312,13 @@ export default function POSPage() {
                       </span>
                     </div>
                   </div>
-                </button>
+                </div>
               ))}
-            </div>
           </div>
         </div>
-
-        {/* Checkout Panel */}
-        <div className="w-96 bg-white rounded-lg shadow-sm p-4 flex flex-col">
+        
+        {/* Right side - Cart */}
+        <div className="lg:w-1/3 bg-white rounded-lg shadow p-4 flex flex-col h-full">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Current Order</h2>
           
           {/* Cart Items */}
@@ -435,4 +436,4 @@ export default function POSPage() {
       </div>
     </PageLayout>
   );
-} 
+}

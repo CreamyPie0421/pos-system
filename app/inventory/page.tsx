@@ -34,7 +34,7 @@ interface ProductFormData {
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -49,40 +49,34 @@ export default function InventoryPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch products
+        const productsResponse = await fetch('/api/products');
+        const productsData = await productsResponse.json();
+        setProducts(productsData);
+
+        // Fetch categories
+        const categoriesResponse = await fetch('/api/categories');
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData);
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load data');
+        setIsLoading(false);
+      }
+    };
+
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const [productsRes, categoriesRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/categories')
-      ]);
-
-      if (!productsRes.ok || !categoriesRes.ok) {
-        throw new Error('Failed to fetch data');
-      }
-
-      const [productsData, categoriesData] = await Promise.all([
-        productsRes.json(),
-        categoriesRes.json()
-      ]);
-
-      setProducts(productsData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Failed to load products and categories');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.category.name === selectedCategory;
+    const matchesCategory = selectedCategory === null || product.category.id === selectedCategory;
     const searchLower = searchQuery.toLowerCase();
     const productName = product.name.toLowerCase();
     
@@ -96,40 +90,88 @@ export default function InventoryPage() {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('price', formData.price.toString());
-      formDataToSend.append('stock', formData.stock.toString());
-      formDataToSend.append('categoryId', formData.categoryId);
+      setIsSubmitting(true);
+      
+      let imageUrl = null;
+      
       if (formData.image) {
-        formDataToSend.append('image', formData.image);
-      }
-
-      const response = await fetch('/api/products', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-
-      if (response.ok) {
+        // Convert image to base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(formData.image);
+        
+        const base64Data = await base64Promise;
+        
+        // Send base64 data to server
+        const productData = {
+          name: formData.name,
+          description: formData.description || '',
+          price: formData.price,
+          stock: formData.stock,
+          categoryId: formData.categoryId,
+          imageBase64: base64Data
+        };
+        
+        const response = await fetch('/api/products-base64', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(productData)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to add product');
+        }
+        
+        // Success handling
         const newProduct = await response.json();
         setProducts([...products, newProduct]);
         setIsAddModalOpen(false);
-        setFormData({
-          name: '',
-          description: '',
-          price: 0,
-          stock: 0,
-          categoryId: '',
-          image: null,
-        });
+        resetForm();
       } else {
-        throw new Error('Failed to add product');
+        // No image, just create product with basic data
+        const productData = {
+          name: formData.name,
+          description: formData.description || '',
+          price: formData.price,
+          stock: formData.stock,
+          categoryId: formData.categoryId,
+          image: null
+        };
+        
+        const response = await fetch('/api/products-direct', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(productData)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to add product');
+        }
+        
+        // Success handling
+        const newProduct = await response.json();
+        setProducts([...products, newProduct]);
+        setIsAddModalOpen(false);
+        resetForm();
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('Failed to add product. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -230,6 +272,17 @@ export default function InventoryPage() {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      price: 0,
+      stock: 0,
+      categoryId: '',
+      image: null,
+    });
+  };
+
   if (isLoading) {
     return (
       <PageLayout title="Inventory">
@@ -258,11 +311,11 @@ export default function InventoryPage() {
             <div className="flex items-center space-x-4 overflow-x-auto pb-2">
               <button
                 className={`px-4 py-2 rounded-lg flex-shrink-0 ${
-                  selectedCategory === 'all'
+                  selectedCategory === null
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
-                onClick={() => setSelectedCategory('all')}
+                onClick={() => setSelectedCategory(null)}
               >
                 All
               </button>
@@ -270,11 +323,11 @@ export default function InventoryPage() {
                 <button
                   key={category.id}
                   className={`px-4 py-2 rounded-lg flex-shrink-0 ${
-                    selectedCategory === category.name
+                    selectedCategory === category.id
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
-                  onClick={() => setSelectedCategory(category.name)}
+                  onClick={() => setSelectedCategory(category.id)}
                 >
                   {category.name}
                 </button>
@@ -447,7 +500,7 @@ export default function InventoryPage() {
                           onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                         >
                           <option value="">Select a category</option>
-                          {categories.map(category => (
+                          {categories.map((category) => (
                             <option key={category.id} value={category.id}>
                               {category.name}
                             </option>
@@ -575,7 +628,7 @@ export default function InventoryPage() {
                           onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                         >
                           <option value="">Select a category</option>
-                          {categories.map(category => (
+                          {categories.map((category) => (
                             <option key={category.id} value={category.id}>
                               {category.name}
                             </option>
@@ -657,4 +710,4 @@ export default function InventoryPage() {
       </div>
     </PageLayout>
   );
-} 
+}

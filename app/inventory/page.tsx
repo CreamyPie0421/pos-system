@@ -97,53 +97,57 @@ export default function InventoryPage() {
       let imageUrl = null;
       
       if (formData.image) {
-        // Convert image to base64
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-        });
-        reader.readAsDataURL(formData.image);
-        
-        const base64Data = await base64Promise;
-        
-        // Send base64 data to server
-        const productData = {
-          name: formData.name,
-          description: formData.description || '',
-          price: formData.price,
-          stock: formData.stock,
-          categoryId: formData.categoryId,
-          imageBase64: base64Data
-        };
-        
-        const response = await fetch('/api/products-base64', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(productData)
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to add product');
+        try {
+          // Convert file to base64
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+          });
+          reader.readAsDataURL(formData.image);
+          
+          const base64Data = await base64Promise;
+          
+          // Send base64 data to server
+          const productData = {
+            name: formData.name,
+            description: formData.description || '',
+            price: formData.price,
+            stock: formData.stock,
+            categoryId: formData.categoryId,
+            imageBase64: base64Data
+          };
+          
+          const response = await fetch('/api/products-base64', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productData)
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to add product');
+          }
+          
+          // Success handling
+          const newProduct = await response.json();
+          setProducts([...products, newProduct]);
+          setIsAddModalOpen(false);
+          resetForm();
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          throw error;
         }
-        
-        // Success handling
-        const newProduct = await response.json();
-        setProducts([...products, newProduct]);
-        setIsAddModalOpen(false);
-        resetForm();
       } else {
-        // No image, just create product with basic data
+        // No image, just create product
         const productData = {
           name: formData.name,
           description: formData.description || '',
           price: formData.price,
           stock: formData.stock,
-          categoryId: formData.categoryId,
-          image: null
+          categoryId: formData.categoryId
         };
         
         const response = await fetch('/api/products-direct', {

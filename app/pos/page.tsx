@@ -34,6 +34,7 @@ export default function POSPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cash, setCash] = useState<number>(0);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -223,15 +224,40 @@ export default function POSPage() {
   }
 
   return (
-    <PageLayout title="Point of Sale">
-      <div className="h-full flex">
-        {/* Main content area - Products */}
-        <div className="flex-1 flex flex-col overflow-hidden pr-4">
-          {/* Search and filters */}
-          <div className="mb-4">
-            <div className="flex items-center space-x-4 overflow-x-auto pb-2">
+    <PageLayout title="POS">
+      {/* Mobile View Toggle */}
+      <div className="lg:hidden flex items-center justify-between mb-4 bg-white rounded-lg shadow-sm p-4">
+        <button
+          onClick={() => setShowCheckout(false)}
+          className={`flex-1 py-2 px-4 rounded-l-lg ${!showCheckout ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        >
+          Products
+        </button>
+        <button
+          onClick={() => setShowCheckout(true)}
+          className={`flex-1 py-2 px-4 rounded-r-lg ${showCheckout ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        >
+          Cart ({cart.length})
+        </button>
+      </div>
+
+      <div className="h-full flex flex-col lg:flex-row">
+        {/* Products Section */}
+        <div className={`flex-1 flex flex-col h-full lg:pr-4 mb-4 lg:mb-0 ${showCheckout ? 'hidden lg:flex' : 'flex'}`}>
+          {/* Search and Categories */}
+          <div className="mb-4 space-y-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="w-full px-4 py-2 border rounded-lg text-black"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex overflow-x-auto pb-2 -mx-2 px-2">
               <button
-                className={`px-4 py-2 rounded-lg flex-shrink-0 ${
+                className={`flex-shrink-0 px-4 py-2 rounded-lg mr-2 ${
                   selectedCategory === null
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -243,7 +269,7 @@ export default function POSPage() {
               {categories.map(category => (
                 <button
                   key={category.id}
-                  className={`px-4 py-2 rounded-lg flex-shrink-0 ${
+                  className={`flex-shrink-0 px-4 py-2 rounded-lg mr-2 ${
                     selectedCategory === category.id
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -254,25 +280,23 @@ export default function POSPage() {
                 </button>
               ))}
             </div>
-            <div className="relative mt-2">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full px-4 py-2 border rounded-lg"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
           </div>
 
-          {/* Products grid */}
+          {/* Products Grid */}
           <div className="flex-1 overflow-y-auto bg-white rounded-lg shadow-sm p-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map((product) => (
-                <div
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {filteredProducts.map(product => (
+                <button
                   key={product.id}
-                  className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => addToCart(product)}
+                  onClick={() => {
+                    addToCart(product);
+                    // Auto switch to cart view on mobile after adding item
+                    if (window.innerWidth < 1024) {
+                      setShowCheckout(true);
+                    }
+                  }}
+                  disabled={product.stock <= 0}
+                  className="relative bg-white border rounded-lg p-2 hover:shadow-md transition-shadow duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
                 >
                   <div className="h-32 w-full bg-gray-100 rounded-lg overflow-hidden">
                     {product.image ? (
@@ -306,14 +330,14 @@ export default function POSPage() {
                       </span>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Checkout panel - Fixed width */}
-        <div className="w-[400px] flex-shrink-0 flex flex-col bg-white rounded-lg shadow-sm">
+        {/* Cart Section */}
+        <div className={`w-full lg:w-96 bg-white rounded-lg shadow-sm flex flex-col h-[600px] lg:h-full ${showCheckout ? 'flex' : 'hidden lg:flex'}`}>
           {/* Cart items */}
           <div className="flex-1 overflow-y-auto p-4">
             <h2 className="text-lg font-semibold text-black mb-4">Cart</h2>

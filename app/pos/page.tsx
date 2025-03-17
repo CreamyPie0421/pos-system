@@ -318,7 +318,7 @@ export default function POSPage() {
           <div className="flex-1 overflow-y-auto p-4">
             <h2 className="text-lg font-semibold mb-4">Cart</h2>
             {cart.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
+              <div className="text-center text-gray-600 py-8">
                 Cart is empty
               </div>
             ) : (
@@ -326,24 +326,24 @@ export default function POSPage() {
                 {cart.map((item) => (
                   <div key={item.id} className="flex items-center space-x-4">
                     <div className="flex-1">
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm text-gray-700">
                         ₱{item.price.toFixed(2)} × {item.quantity}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">₱{(item.price * item.quantity).toFixed(2)}</div>
+                      <div className="font-medium text-gray-900">₱{(item.price * item.quantity).toFixed(2)}</div>
                       <div className="flex items-center space-x-2 mt-1">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="p-1 rounded-md hover:bg-gray-100"
+                          className="p-1 rounded-md hover:bg-gray-100 text-gray-900"
                         >
                           -
                         </button>
-                        <span>{item.quantity}</span>
+                        <span className="text-gray-900">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="p-1 rounded-md hover:bg-gray-100"
+                          className="p-1 rounded-md hover:bg-gray-100 text-gray-900"
                         >
                           +
                         </button>
@@ -357,32 +357,32 @@ export default function POSPage() {
 
           {/* Checkout summary */}
           <div className="border-t p-4 space-y-4">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm text-gray-900">
               <span>Subtotal</span>
               <span>₱{subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm text-gray-900">
               <span>Tax (12%)</span>
               <span>₱{tax.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between font-semibold">
+            <div className="flex justify-between font-semibold text-gray-900">
               <span>Total</span>
               <span>₱{total.toFixed(2)}</span>
             </div>
             <div className="pt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-900 mb-1">
                 Cash
               </label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md text-gray-900"
                 value={cash}
                 onChange={(e) => setCash(parseFloat(e.target.value) || 0)}
               />
             </div>
-            <div className="flex justify-between text-lg font-semibold">
+            <div className="flex justify-between text-lg font-semibold text-gray-900">
               <span>Change</span>
               <span>₱{(cash - total).toFixed(2)}</span>
             </div>

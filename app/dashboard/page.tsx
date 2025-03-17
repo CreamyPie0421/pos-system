@@ -34,8 +34,9 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch('/api/dashboard');
         if (!response.ok) {
           throw new Error('Failed to fetch dashboard data');
@@ -50,7 +51,12 @@ export default function DashboardPage() {
       }
     };
 
-    fetchData();
+    fetchDashboardData();
+
+    // Auto refresh every 30 seconds
+    const interval = setInterval(fetchDashboardData, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (isLoading) {

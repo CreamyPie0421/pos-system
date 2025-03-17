@@ -241,9 +241,9 @@ export default function POSPage() {
         </button>
       </div>
 
-      <div className="h-full flex flex-col lg:flex-row">
+      <div className="h-[calc(100vh-10rem)] flex flex-col lg:flex-row gap-4">
         {/* Products Section */}
-        <div className={`flex-1 flex flex-col h-full lg:pr-4 mb-4 lg:mb-0 ${showCheckout ? 'hidden lg:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col h-full ${showCheckout ? 'hidden lg:flex' : 'flex'}`}>
           {/* Search and Categories */}
           <div className="mb-4 space-y-4">
             <div className="relative">
@@ -290,7 +290,6 @@ export default function POSPage() {
                   key={product.id}
                   onClick={() => {
                     addToCart(product);
-                    // Auto switch to cart view on mobile after adding item
                     if (window.innerWidth < 1024) {
                       setShowCheckout(true);
                     }
@@ -337,7 +336,7 @@ export default function POSPage() {
         </div>
 
         {/* Cart Section */}
-        <div className={`w-full lg:w-96 bg-white rounded-lg shadow-sm flex flex-col h-[600px] lg:h-full ${showCheckout ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`w-full lg:w-[380px] bg-white rounded-lg shadow-sm flex flex-col ${showCheckout ? 'flex' : 'hidden lg:flex'}`}>
           {/* Cart items */}
           <div className="flex-1 overflow-y-auto p-4">
             <h2 className="text-lg font-semibold text-black mb-4">Cart</h2>

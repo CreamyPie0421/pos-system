@@ -316,9 +316,9 @@ export default function POSPage() {
         <div className="w-[400px] flex-shrink-0 flex flex-col bg-white rounded-lg shadow-sm">
           {/* Cart items */}
           <div className="flex-1 overflow-y-auto p-4">
-            <h2 className="text-lg font-semibold text-black-900 mb-4">Cart</h2>
+            <h2 className="text-lg font-semibold text-black mb-4">Cart</h2>
             {cart.length === 0 ? (
-              <div className="text-center text-black-900 py-8">
+              <div className="text-center text-black py-8">
                 Cart is empty
               </div>
             ) : (
@@ -326,24 +326,24 @@ export default function POSPage() {
                 {cart.map((item) => (
                   <div key={item.id} className="flex items-center space-x-4">
                     <div className="flex-1">
-                      <div className="font-medium text-black-900">{item.name}</div>
-                      <div className="text-sm text-black-900">
+                      <div className="font-medium text-black">{item.name}</div>
+                      <div className="text-sm text-black">
                         ₱{item.price.toFixed(2)} × {item.quantity}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium text-black-900">₱{(item.price * item.quantity).toFixed(2)}</div>
+                      <div className="font-medium text-black">₱{(item.price * item.quantity).toFixed(2)}</div>
                       <div className="flex items-center space-x-2 mt-1">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="p-1 rounded-md hover:bg-gray-100 text-black-900"
+                          className="p-1 rounded-md hover:bg-gray-100 text-black"
                         >
                           -
                         </button>
-                        <span className="text-black-900">{item.quantity}</span>
+                        <span className="text-black">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="p-1 rounded-md hover:bg-gray-100 text-black-900"
+                          className="p-1 rounded-md hover:bg-gray-100 text-black"
                         >
                           +
                         </button>

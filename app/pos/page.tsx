@@ -241,9 +241,9 @@ export default function POSPage() {
         </button>
       </div>
 
-      <div className="h-[calc(100vh-10rem)] flex flex-col lg:flex-row gap-4">
+      <div className="h-[calc(100vh-10rem)] flex flex-col lg:flex-row gap-4 max-w-full overflow-hidden">
         {/* Products Section */}
-        <div className={`flex-1 flex flex-col h-full ${showCheckout ? 'hidden lg:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col min-w-0 ${showCheckout ? 'hidden lg:flex' : 'flex'}`}>
           {/* Search and Categories */}
           <div className="mb-4 space-y-4">
             <div className="relative">
@@ -255,7 +255,7 @@ export default function POSPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex overflow-x-auto pb-2 -mx-2 px-2">
+            <div className="flex overflow-x-auto pb-2 hide-scrollbar">
               <button
                 className={`flex-shrink-0 px-4 py-2 rounded-lg mr-2 ${
                   selectedCategory === null
@@ -284,7 +284,7 @@ export default function POSPage() {
 
           {/* Products Grid */}
           <div className="flex-1 overflow-y-auto bg-white rounded-lg shadow-sm p-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
               {filteredProducts.map(product => (
                 <button
                   key={product.id}
@@ -297,7 +297,7 @@ export default function POSPage() {
                   disabled={product.stock <= 0}
                   className="relative bg-white border rounded-lg p-2 hover:shadow-md transition-shadow duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
                 >
-                  <div className="h-32 w-full bg-gray-100 rounded-lg overflow-hidden">
+                  <div className="aspect-square w-full bg-gray-100 rounded-lg overflow-hidden">
                     {product.image ? (
                       <img
                         src={product.image}
@@ -310,9 +310,9 @@ export default function POSPage() {
                       </div>
                     )}
                   </div>
-                  <div className="mt-3 flex flex-col min-w-0">
+                  <div className="mt-2">
                     <h3 className="font-medium text-gray-900 text-sm truncate">{product.name}</h3>
-                    <div className="mt-2 flex items-center justify-between">
+                    <div className="mt-1 flex items-center justify-between">
                       <span className="text-base font-semibold text-gray-900">₱{product.price.toFixed(2)}</span>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         product.stock <= 0 
@@ -336,7 +336,7 @@ export default function POSPage() {
         </div>
 
         {/* Cart Section */}
-        <div className={`w-full lg:w-[380px] bg-white rounded-lg shadow-sm flex flex-col ${showCheckout ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`w-full lg:w-[320px] bg-white rounded-lg shadow-sm flex flex-col ${showCheckout ? 'flex' : 'hidden lg:flex'}`}>
           {/* Cart items */}
           <div className="flex-1 overflow-y-auto p-4">
             <h2 className="text-lg font-semibold text-black mb-4">Cart</h2>
@@ -425,6 +425,16 @@ export default function POSPage() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </PageLayout>
   );
 }

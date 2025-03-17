@@ -34,11 +34,18 @@ export default function SalesPage() {
 
   const fetchSales = async () => {
     try {
+      setIsLoading(true);
+      console.log('Fetching sales data...');
+      
       const response = await fetch('/api/sales');
       if (!response.ok) {
-        throw new Error('Failed to fetch sales data');
+        const errorData = await response.json();
+        console.error('Failed to fetch sales:', errorData);
+        throw new Error(`Failed to fetch sales: ${errorData.error || response.statusText}`);
       }
+      
       const data = await response.json();
+      console.log('Sales data fetched successfully:', data);
       setSales(data);
     } catch (error) {
       console.error('Error fetching sales:', error);

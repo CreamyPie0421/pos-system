@@ -77,10 +77,11 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'No user found' }, { status: 400 });
+      console.error('No admin user found in the database');
+      return NextResponse.json({ error: 'No admin user found. Please ensure there is at least one admin user in the system.' }, { status: 400 });
     }
 
-    console.log('Creating sale with data:', body);
+    console.log('Creating sale with user:', user.id);
 
     // Validate items structure
     const saleItems = body.items.map((item: any) => {

@@ -58,6 +58,7 @@ model Customer {
   name      String
   email     String?  @unique
   phone     String?
+  sales     Sale[]
 }
 
 model Sale {
@@ -75,16 +76,23 @@ model Sale {
   items      SaleItem[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([customerId])
 }
 
 model SaleItem {
   id        String   @id @default(cuid())
   product   Product  @relation(fields: [productId], references: [id])
   productId String
-  sale      Sale     @relation(fields: [saleId], references: [id])
+  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   saleId    String
   quantity  Int
-  price    Float
+  price     Float
+  subtotal  Float    @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([saleId])
 }

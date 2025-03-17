@@ -378,8 +378,14 @@ export default function POSPage() {
                 min="0"
                 step="0.01"
                 className="w-full px-3 py-2 border rounded-md text-black"
-                value={cash}
+                value={cash || ''}
                 onChange={(e) => setCash(parseFloat(e.target.value) || 0)}
+                onFocus={(e) => {
+                  if (cash === 0) {
+                    setCash(0);
+                    e.target.value = '';
+                  }
+                }}
               />
             </div>
             <div className="flex justify-between text-lg font-semibold text-black">

@@ -32,15 +32,17 @@ enum Role {
 model Product {
   id          String     @id @default(cuid())
   name        String
-  description String?
+  description String     @default("")
   price       Float
-  stock       Int
-  image       String?    // URL ng image
+  stock       Int       @default(0)
+  image       String    @default("https://placehold.co/400x400?text=No+Image")
   category    Category   @relation(fields: [categoryId], references: [id])
   categoryId  String
   saleItems   SaleItem[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  @@index([categoryId])
 }
 
 model Category {

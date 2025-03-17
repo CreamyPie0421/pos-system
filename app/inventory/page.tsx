@@ -93,79 +93,46 @@ export default function InventoryPage() {
     
     try {
       setIsSubmitting(true);
-      setError(null); // Clear previous errors
+      setError(null);
       
+      let imageBase64 = null;
       if (formData.image) {
-        try {
-          // Convert file to base64
-          const reader = new FileReader();
-          const base64Promise = new Promise<string>((resolve, reject) => {
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = (error) => reject(error);
-          });
-          reader.readAsDataURL(formData.image);
-          
-          const base64Data = await base64Promise;
-          
-          console.log("Sending product data with image");
-          const productData = {
-            name: formData.name,
-            description: formData.description || '',
-            price: Number(formData.price),
-            stock: Number(formData.stock),
-            categoryId: formData.categoryId,
-            imageBase64: base64Data
-          };
-          
-          const response = await fetch('/api/products-base64', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(productData)
-          });
-          
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to add product');
+        const reader = new FileReader();
+        imageBase64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          if (formData.image) {
+            reader.readAsDataURL(formData.image);
           }
-          
-          const newProduct = await response.json();
-          setProducts([...products, newProduct]);
-          setIsAddModalOpen(false);
-          resetForm();
-        } catch (error) {
-          console.error('Error uploading image:', error);
-          throw error;
-        }
-      } else {
-        console.log("Sending product data without image");
-        const productData = {
-          name: formData.name,
-          description: formData.description || '',
-          price: Number(formData.price),
-          stock: Number(formData.stock),
-          categoryId: formData.categoryId
-        };
-        
-        const response = await fetch('/api/products-direct', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(productData)
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to add product');
-        }
-        
-        const newProduct = await response.json();
-        setProducts([...products, newProduct]);
-        setIsAddModalOpen(false);
-        resetForm();
       }
+      
+      const productData = {
+        name: formData.name,
+        description: formData.description || '',
+        price: Number(formData.price),
+        stock: Number(formData.stock),
+        categoryId: formData.categoryId,
+        imageBase64: imageBase64
+      };
+      
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add product');
+      }
+      
+      const newProduct = await response.json();
+      setProducts([...products, newProduct]);
+      setIsAddModalOpen(false);
+      resetForm();
     } catch (error) {
       console.error('Error adding product:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';

@@ -357,32 +357,32 @@ export default function POSPage() {
 
           {/* Checkout summary */}
           <div className="border-t p-4 space-y-4">
-            <div className="flex justify-between text-sm text-black-900">
+            <div className="flex justify-between text-sm text-black">
               <span>Subtotal</span>
               <span>₱{subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm text-black-900">
+            <div className="flex justify-between text-sm text-black">
               <span>Tax (12%)</span>
               <span>₱{tax.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between font-semibold text-black-900">
+            <div className="flex justify-between font-semibold text-black">
               <span>Total</span>
               <span>₱{total.toFixed(2)}</span>
             </div>
             <div className="pt-4">
-              <label className="block text-sm font-medium text-black-900 mb-1">
+              <label className="block text-sm font-medium text-black mb-1">
                 Cash
               </label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border rounded-md text-black-900"
+                className="w-full px-3 py-2 border rounded-md text-black"
                 value={cash}
                 onChange={(e) => setCash(parseFloat(e.target.value) || 0)}
               />
             </div>
-            <div className="flex justify-between text-lg font-semibold text-black-900">
+            <div className="flex justify-between text-lg font-semibold text-black">
               <span>Change</span>
               <span>₱{(cash - total).toFixed(2)}</span>
             </div>

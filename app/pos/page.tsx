@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
-import { MagnifyingGlassIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, TrashIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 interface Product {
   id: string;
@@ -338,39 +338,55 @@ export default function POSPage() {
         {/* Cart Section */}
         <div className={`w-full lg:w-[320px] bg-white rounded-lg shadow-sm flex flex-col ${showCheckout ? 'flex' : 'hidden lg:flex'}`}>
           {/* Cart items */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <h2 className="text-lg font-semibold text-black mb-4">Cart</h2>
+          <div className="flex-[2] overflow-y-auto p-4">
             {cart.length === 0 ? (
-              <div className="text-center text-black py-8">
+              <div className="h-full flex items-center justify-center text-gray-600">
                 Cart is empty
               </div>
             ) : (
               <div className="space-y-4">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4">
-                    <div className="flex-1">
-                      <div className="font-medium text-black">{item.name}</div>
-                      <div className="text-sm text-black">
-                        ₱{item.price.toFixed(2)} × {item.quantity}
-                      </div>
+                  <div key={item.id} className="flex items-start space-x-3">
+                    <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center">
+                          <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium text-black">₱{(item.price * item.quantity).toFixed(2)}</div>
-                      <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-gray-900 truncate">{item.name}</h3>
+                      <p className="mt-1 text-sm text-gray-700">₱{item.price.toFixed(2)}</p>
+                      <div className="mt-1 flex items-center space-x-2">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="p-1 rounded-md hover:bg-gray-100 text-black"
+                          className="text-gray-500 hover:text-gray-700"
                         >
-                          -
+                          <MinusIcon className="h-4 w-4" />
                         </button>
-                        <span className="text-black">{item.quantity}</span>
+                        <span className="text-sm text-gray-900">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="p-1 rounded-md hover:bg-gray-100 text-black"
+                          className="text-gray-500 hover:text-gray-700"
                         >
-                          +
+                          <PlusIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          <TrashIcon className="h-4 w-4" />
                         </button>
                       </div>
+                    </div>
+                    <div className="text-sm font-medium text-gray-900">
+                      ₱{(item.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}

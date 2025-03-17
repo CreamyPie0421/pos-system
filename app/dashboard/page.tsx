@@ -136,55 +136,127 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Transactions */}
-        <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Transactions</h2>
-            <div className="overflow-x-auto">
-              <div className="inline-block min-w-full align-middle">
-                <div className="overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-white">
-                      <tr>
-                        <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">
-                          Transaction ID
-                        </th>
-                        <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">
-                          Customer
-                        </th>
-                        <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">
-                          Products
-                        </th>
-                        <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">
-                          Total
-                        </th>
-                        <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">
-                          Date
-                        </th>
+        <div className="p-6">
+          {/* Mobile View: Recent Transactions */}
+          <div className="block lg:hidden mb-6">
+            <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {dashboardData?.recentTransactions.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(transaction.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₱{transaction.total.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Completed
+                          </span>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {dashboardData?.recentTransactions.map((transaction) => (
-                        <tr key={transaction.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            #{transaction.id.slice(0, 8).toUpperCase()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {transaction.customer?.name || 'Walk-in Customer'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {transaction.items.reduce((sum, item) => sum + item.quantity, 0)} items
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ₱{transaction.total.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(transaction.createdAt).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Statistics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-sm font-medium text-gray-500">Today's Sales</h3>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">₱{dashboardData?.stats.totalSales.value.toFixed(2)}</p>
+              <div className="mt-4">
+                <div className="text-sm text-gray-500">
+                  {dashboardData?.stats.totalSales.change && (
+                    <>
+                      {dashboardData?.stats.totalSales.change > 0 ? (
+                        <span className="text-green-600">↑ {dashboardData?.stats.totalSales.change.toFixed(1)}%</span>
+                      ) : (
+                        <span className="text-red-600">↓ {Math.abs(dashboardData?.stats.totalSales.change).toFixed(1)}%</span>
+                      )} vs yesterday
+                    </>
+                  )}
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-sm font-medium text-gray-500">Total Products</h3>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">{dashboardData?.stats.productsSold.value.toString() || '0'}</p>
+              <div className="mt-4">
+                <div className="text-sm text-gray-500">
+                  {/* Assuming lowStockProducts is not provided in the original data */}
+                  {/* Add logic to calculate lowStockProducts based on productsSold */}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-sm font-medium text-gray-500">Total Categories</h3>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">{/* Assuming totalCategories is not provided in the original data */}</p>
+              <div className="mt-4">
+                <div className="text-sm text-gray-500">
+                  {/* Assuming totalProducts is not provided in the original data */}
+                  {/* Add logic to calculate totalProducts based on productsSold */}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-sm font-medium text-gray-500">Total Sales</h3>
+              <p className="mt-2 text-3xl font-semibold text-gray-900">₱{dashboardData?.stats.totalSales.value.toFixed(2)}</p>
+              <div className="mt-4">
+                <div className="text-sm text-gray-500">
+                  {/* Assuming totalTransactions is not provided in the original data */}
+                  {/* Add logic to calculate totalTransactions based on recentTransactions */}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop View: Recent Transactions */}
+          <div className="hidden lg:block">
+            <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {dashboardData?.recentTransactions.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(transaction.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₱{transaction.total.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Completed
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
